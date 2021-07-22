@@ -16,7 +16,7 @@ namespace PerfettoCds
 
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {
-            var filePath = dataSources.First().Uri.LocalPath;
+            var filePath = dataSources.First().GetUri().LocalPath;
             var parser = new PerfettoSourceParser(filePath);
             return new PerfettoDataProcessor(parser,
                                             options,
@@ -52,21 +52,16 @@ namespace PerfettoCds
             };
         }
 
-        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
-        {
-            if (dataSource.IsDirectory())
-            {
-                return false;
-            }
-
-            var ext = Path.GetExtension(dataSource.Uri.LocalPath);
-
-            return dataSource.IsFile() && StringComparer.OrdinalIgnoreCase.Equals(".perfetto-trace", ext);
-        }
-
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
         {
             this.applicationEnvironment = applicationEnvironment;
+        }
+
+        protected override bool IsFileSupportedCore(string path)
+        {
+            return StringComparer.OrdinalIgnoreCase.Equals(
+                ".perfetto-trace",
+                Path.GetExtension(path));
         }
     }
 
@@ -78,7 +73,7 @@ namespace PerfettoCds
 
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {
-            var filePath = dataSources.First().Uri.LocalPath;
+            var filePath = dataSources.First().GetUri().LocalPath;
             var parser = new PerfettoSourceParser(filePath);
             return new PerfettoDataProcessor(parser,
                                             options,
@@ -114,21 +109,16 @@ namespace PerfettoCds
             };
         }
 
-        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
-        {
-            if (dataSource.IsDirectory())
-            {
-                return false;
-            }
-
-            var ext = Path.GetExtension(dataSource.Uri.LocalPath);
-
-            return dataSource.IsFile() && StringComparer.OrdinalIgnoreCase.Equals(".pftrace", ext);
-        }
-
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
         {
             this.applicationEnvironment = applicationEnvironment;
+        }
+
+        protected override bool IsFileSupportedCore(string path)
+        {
+            return StringComparer.OrdinalIgnoreCase.Equals(
+                ".pftrace",
+                Path.GetExtension(path));
         }
     }
 }
