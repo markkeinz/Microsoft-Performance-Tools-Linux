@@ -23,6 +23,7 @@ namespace PerfettoCds
         // ID for composite data cookers
         public const string GenericEventCookerId = "PerfettoGenericEventCooker";
         public const string CpuSchedEventCookerId = "PerfettoCpuSchedEventCooker";
+        public const string EventCorrelationCookerId = "PerfettoEventCorrelationCooker";
 
         // Events for source cookers
         public const string SliceEvent = PerfettoSliceEvent.Key;
@@ -57,5 +58,7 @@ namespace PerfettoCds
             new DataCookerPath(PerfettoPluginConstants.GenericEventCookerId);
         public static readonly DataCookerPath CpuSchedEventCookerPath =
             new DataCookerPath(PerfettoPluginConstants.CpuSchedEventCookerId);
+        public static readonly DataCookerPath EventCorrelationCookerPath =
+            new DataCookerPath(PerfettoPluginConstants.EventCorrelationCookerId);
     }
 }

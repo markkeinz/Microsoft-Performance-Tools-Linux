@@ -250,13 +250,10 @@ namespace PerfettoCds.Pipeline
 
         public override (CorrelationAction, Object) ExamineEvent(in PerfettoGenericEvent e)
         {
-            Func<Tuple<string, string>, string> selectFirstItem = (Tuple<string, string> t) => t.Item1;
-            Func<Tuple<string, string>, string> selectSecondItem = (Tuple<string, string> t) => t.Item2;
-
             if ((_startEventRx == null || _startEventRx.IsMatch(e.EventName)) && (_startOpcode == null || _startOpcode == GetValue(e, "debug.OPCODE")))
             {
                 // Found possible start event. Check that any additional fields exist; return if not.
-                if (!HasAllFields(e, selectFirstItem))
+                if (!HasAllFields(e, (t) => t.Item1))
                 {
                     return (CorrelationAction.None, null);
                 }
@@ -266,7 +263,7 @@ namespace PerfettoCds.Pipeline
             else if ((_stopEventRx == null || _stopEventRx.IsMatch(e.EventName)) && (_stopOpcode == null || _stopOpcode == GetValue(e, "debug.OPCODE")))
             {
                 // Found possible stop event. Check that any additional fields exist; return if not.
-                if (!HasAllFields(e, selectSecondItem))
+                if (!HasAllFields(e, (t) => t.Item2))
                 {
                     return (CorrelationAction.None, null);
                 }

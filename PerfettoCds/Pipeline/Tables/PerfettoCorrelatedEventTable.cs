@@ -1,29 +1,28 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using PerfettoCds.Pipeline.DataCookers;
+using PerfettoCds.Pipeline.DataOutput;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Diagnostics.CodeAnalysis;
-using PerfettoCds.Pipeline.DataOutput;
-using Microsoft.Performance.SDK;
-using PerfettoCds.Pipeline.DataCookers;
 
 namespace PerfettoCds.Pipeline.Tables
 {
     [Table]
-    public class PerfettoGenericEventTable
+    public class PerfettoGenericCorrelatedEventTable
     {
         // Set some sort of max to prevent ridiculous field counts
         public const int AbsoluteMaxFields = 20;
 
         public static TableDescriptor TableDescriptor => new TableDescriptor(
-            Guid.Parse("{506777b6-f1a3-437a-b976-bc48190450b6}"),
-            "Perfetto Generic Events",
-            "All app/component events in the Perfetto trace",
+            Guid.Parse("{37cedaaa-5679-4366-b627-9b638aaef222}"),
+            "Perfetto Correlated Events",
+            "Spans deduced from generic events",
             "Perfetto",
-            requiredDataCookers: new List<DataCookerPath> { PerfettoPluginConstants.GenericEventCookerPath }
+            requiredDataCookers: new List<DataCookerPath> { PerfettoPluginConstants.EventCorrelationCookerPath }
         );
 
         private static readonly ColumnConfiguration ProcessNameColumn = new ColumnConfiguration(
@@ -63,22 +62,22 @@ namespace PerfettoCds.Pipeline.Tables
             // We dynamically adjust the column headers
             // This is the max number of fields we can expect for this table
             int maxFieldCount = Math.Min(AbsoluteMaxFields, tableData.QueryOutput<int>(
-                new DataOutputPath(PerfettoPluginConstants.GenericEventCookerPath, nameof(PerfettoGenericEventCooker.MaximumEventFieldCount))));
+                new DataOutputPath(PerfettoPluginConstants.EventCorrelationCookerPath, nameof(PerfettoEventCorrelationCooker.MaximumEventFieldCount))));
 
             // Get data from the cooker
             var events = tableData.QueryOutput<ProcessedEventData<PerfettoGenericEvent>>(
-                new DataOutputPath(PerfettoPluginConstants.GenericEventCookerPath, nameof(PerfettoGenericEventCooker.GenericEvents)));
+                new DataOutputPath(PerfettoPluginConstants.EventCorrelationCookerPath, nameof(PerfettoEventCorrelationCooker.CorrelatedEvents)));
 
             // Start construction of the column order. Pivot on process and thread
-            List<ColumnConfiguration> allColumns = new List<ColumnConfiguration>() 
+            List<ColumnConfiguration> allColumns = new List<ColumnConfiguration>()
             {
                 ProcessNameColumn,
                 ThreadNameColumn,
-                TableConfiguration.PivotColumn, // Columns before this get pivotted on
                 EventNameColumn,
+                TableConfiguration.PivotColumn, // Columns before this get pivotted on
+                
                 CategoryColumn,
                 TypeColumn,
-                EndTimestampColumn,
                 DurationColumn,
             };
 
@@ -155,8 +154,9 @@ namespace PerfettoCds.Pipeline.Tables
             // Finish the column order with the timestamp columned being graphed
             allColumns.Add(TableConfiguration.GraphColumn); // Columns after this get graphed
             allColumns.Add(StartTimestampColumn);
+            allColumns.Add(EndTimestampColumn);
 
-            var tableConfig = new TableConfiguration("Perfetto Trace Events")
+            var tableConfig = new TableConfiguration("Perfetto Correlated Events")
             {
                 Columns = allColumns,
                 Layout = TableLayoutStyle.GraphAndTable
