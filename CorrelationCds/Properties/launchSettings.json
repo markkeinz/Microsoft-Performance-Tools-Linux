@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "CorrelationCds": {
+      "commandName": "Executable",
+      "executablePath": "D:\\wpa0\\analyzer\\wpa\\bin\\Debug\\netcoreapp3.1\\win7-x64\\wpa.exe",
+      "commandLineArgs": "-nodefault -addsearchdir d:\\etw_xperf0\\xperf\\PublishForWPA\\bin\\Debug\\netcoreapp3.1"
+    }
+  }
+}
